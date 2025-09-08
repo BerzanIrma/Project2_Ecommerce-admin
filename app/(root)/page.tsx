@@ -1,26 +1,25 @@
-"use client";
+import { auth } from '@clerk/nextjs/server'
+import prismadb from '@/lib/prismadb'
+import OpenStoreModal from './open-store-modal'
+import RedirectToStore from './redirect-to-store'
 
+export default async function RootPage() {
+  const { userId: authedUserId } = await auth()
+  const userId = authedUserId ?? process.env.DEV_FAKE_USER_ID ?? 'dev-user'
 
-import { useStoreModal } from "@/hooks/use-store-modal";
+  const store = await prismadb.store.findFirst({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+  })
 
-import { useEffect } from "react";
-
-
-const SetupPage = () => {
-  const onOpen = useStoreModal((state) => state.onOpen);
-  const isOpen = useStoreModal((state) => state.isOpen);
-
-useEffect(() => {
-  if (!isOpen) {
-    onOpen();
-  }
-}, [isOpen, onOpen]);
-
+  // Randează întotdeauna redirectorul client-side (preferă lastStoreId din localStorage)
+  // Dacă nu există store în DB pentru user, afișează și caseta.
   return (
-    <div className="p-4">
-      Root Page
-    </div>
-  );
+    <>
+      <RedirectToStore defaultStoreId={store?.id ?? ''} />
+      {!store && <OpenStoreModal />}
+    </>
+  )
 }
-export default SetupPage;
+
 

@@ -5,6 +5,7 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {toast} from "react-hot-toast";
 
 import { useStoreModal } from "@/hooks/use-store-modal";
@@ -22,6 +23,7 @@ const formSchema = z.object({
 
 export const StoreModal = () => {
     const storeModal = useStoreModal();
+    const router = useRouter();
 
    const [loading, setLoading] = useState(false);
 
@@ -36,8 +38,24 @@ export const StoreModal = () => {
         setLoading(true);
 
         const response = await axios.post('/api/stores', values);
-
-       toast.success('Store created.');
+        if (!response || response.status >= 400) {
+            throw new Error('Request failed');
+        }
+        const storeId = response.data?.id as string | undefined;
+        if (!storeId) {
+            throw new Error('Missing storeId in response');
+        }
+        storeModal.onClose();
+        try {
+          if (storeId) {
+            localStorage.setItem('lastStoreId', storeId);
+          }
+        } catch {}
+        try {
+          router.replace(`/${storeId}`);
+        } catch {
+          window.location.assign(`/${storeId}`);
+        }
     } catch (error) {
         toast.error('Something went wrong');
        }  finally {
