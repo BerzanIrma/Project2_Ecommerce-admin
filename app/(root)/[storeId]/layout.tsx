@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@clerk/nextjs/server'
 import prismadb from '@/lib/prismadb'
 import CloseStoreModal from './close-store-modal'
+import Navbar from '@/components/navbar'
 
 export default async function StoreLayout({
   children,
@@ -18,11 +19,12 @@ export default async function StoreLayout({
   }
 
   return (
-    <div>
-      <div className="p-0 text-sm font-normal">This will be a Navbar</div>
+    <>
+      <Navbar />
       <CloseStoreModal />
+      <div className="border-b" />
       <div className="mt-2">{children}</div>
-    </div>
+    </>
   );
 }
 
