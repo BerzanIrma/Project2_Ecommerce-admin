@@ -8,3 +8,4 @@ export default async function SetupLayout({
     await auth();
     return (<>{children}</>);
 }
+
