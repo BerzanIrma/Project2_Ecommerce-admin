@@ -7,6 +7,14 @@ const isProtectedRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  // Allow all API routes to be public (no auth required)
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    if (req.method === 'GET') {
+      return;
+    }
+    await auth.protect();
+    return;
+  }
   if (isProtectedRoute(req)) {
     await auth.protect()
   }

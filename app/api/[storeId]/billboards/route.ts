@@ -12,12 +12,20 @@ export async function GET(
             return new NextResponse('Store id is required', { status: 400 });
         }
 
+        // Return compact list without large image data URIs
         const billboards = await prismadb.billboard.findMany({
             where: {
                 storeId: params.storeId,
             },
             orderBy: {
                 createdAt: 'desc',
+            },
+            select: {
+                id: true,
+                label: true,
+                createdAt: true,
+                updatedAt: true,
+                // Exclude imageUrl to avoid huge base64 payloads in list view
             }
         });
 

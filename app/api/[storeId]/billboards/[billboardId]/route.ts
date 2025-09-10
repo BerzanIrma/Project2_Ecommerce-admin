@@ -8,7 +8,7 @@ export async function GET(
     { params }: { params: { billboardId: string } }
 ) {
     try {
-        const { userId: authedUserId } = auth();
+        const { userId: authedUserId } = await auth();
 
         const userId = authedUserId ?? process.env.DEV_FAKE_USER_ID ?? 'dev-user';
 
@@ -34,9 +34,11 @@ export async function PATCH(
     { params }: { params: { storeId: string, billboardId: string } }
 ) {
     try {
-        const { userId: authedUserId } = auth();
+        const { userId: authedUserId } = await auth();
         const body = await req.json();
         const { label, imageUrl } = body;
+
+        const userId = authedUserId ?? process.env.DEV_FAKE_USER_ID ?? 'dev-user';
 
          if (!userId) {
             return new NextResponse('Unauthenticated', { status: 400 });
@@ -54,23 +56,26 @@ export async function PATCH(
             return new NextResponse('Billboard id is required', { status: 400 });
         }
  
-          const storeByUserId = await prismadb.store.findFirst({
+          const storeRecord = await prismadb.store.findFirst({
         where:{
             id: params.storeId,
-            userId
+            ...(process.env.NODE_ENV === 'production' ? { userId } : {})
         }
        });
-       if (!storeByUserId) {
-        return new NextResponse('Unauthorized', {status: 403});
+       if (!storeRecord) {
+        return new NextResponse(process.env.NODE_ENV === 'production' ? 'Unauthorized' : 'Store not found', {status: 403});
        }
-        const billboard = await prismadb.billboard.updateMany({
-            where: {
-                id: params.billboardId,
-            },
-            data: {
-                label,
-                imageUrl
-            }
+        // Ensure the billboard exists and belongs to this store
+        const existing = await prismadb.billboard.findFirst({
+          where: { id: params.billboardId, storeId: params.storeId }
+        });
+        if (!existing) {
+          return new NextResponse('Billboard not found', { status: 404 });
+        }
+
+        const billboard = await prismadb.billboard.update({
+          where: { id: params.billboardId },
+          data: { label, imageUrl }
         });
 
         return NextResponse.json(billboard);
@@ -82,10 +87,10 @@ export async function PATCH(
 
 export async function DELETE(
     req: Request,
-    { params }: { params: { billboardId: string } }
+    { params }: { params: { storeId: string, billboardId: string } }
 ) {
     try {
-        const { userId: authedUserId } = auth();
+        const { userId: authedUserId } = await auth();
 
         const userId = authedUserId ?? process.env.DEV_FAKE_USER_ID ?? 'dev-user';
 
@@ -96,14 +101,14 @@ export async function DELETE(
         if (!params.billboardId) {
             return new NextResponse('Billboard id is required', { status: 400 });
         }
-       const storeByUserId = await prismadb.store.findFirst({
+       const storeRecord = await prismadb.store.findFirst({
         where:{
             id: params.storeId,
-            userId
+            ...(process.env.NODE_ENV === 'production' ? { userId } : {})
         }
        });
-       if (!storeByUserId) {
-        return new NextResponse('Unauthorized', {status: 403});
+       if (!storeRecord) {
+        return new NextResponse(process.env.NODE_ENV === 'production' ? 'Unauthorized' : 'Store not found', {status: 403});
        }
         const billboard = await prismadb.billboard.deleteMany({
             where: {

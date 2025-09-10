@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import ImageUpload from "@/components/ui/image-upload";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { Trash } from "lucide-react";
 
 const formSchema = z.object({
     label: z.string().min(1),
@@ -37,6 +39,7 @@ export const BillboardForm = ({ initialData }: BillboardFormProps) => {
     const params = useParams();
 
     const [loading, setLoading] = useState(false);
+    const [open, setOpen] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -76,8 +79,9 @@ export const BillboardForm = ({ initialData }: BillboardFormProps) => {
                 const response = await axios.post(`/api/${params.storeId}/billboards`, data);
                 console.log("Billboard created with ID:", response.data.id);
                 console.log("Full response:", response.data);
+                router.refresh();
+                router.push(`/${params.storeId}/billboards`);
                 toast.success(toastMessage);
-                // Nu mai redirectionez, rămân pe pagina curentă
             }
         } catch (error: any) {
             console.error("Billboard submission error:", error);
@@ -106,11 +110,28 @@ export const BillboardForm = ({ initialData }: BillboardFormProps) => {
 
    return(
 <>
+            <AlertModal 
+              isOpen={open}
+              onClose={() => setOpen(false)}
+              onConfirm={onDelete}
+              loading={loading}
+            />
             <div className="flex items-center justify-between">
                 <Heading
                     title={title}
                     description={description}
                 />
+                {initialData && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    disabled={loading}
+                    onClick={() => setOpen(true)}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                )}
             </div>
             <Separator />
             <Form {...form}>
@@ -153,7 +174,7 @@ export const BillboardForm = ({ initialData }: BillboardFormProps) => {
                     </Button>
                 </form>
             </Form>
-            <Separator />
+            {initialData ? null : <Separator />}
         </>
     );
 };

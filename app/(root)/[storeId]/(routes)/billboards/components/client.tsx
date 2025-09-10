@@ -5,6 +5,10 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { Plus } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import { BillboardColumn, columns } from "./columns";
+import { DataTable } from "@/components/ui/data-table";
+import { ApiList } from "@/components/ui/api-list";
+// import { ApiList } from "@/components/ui/api-list";
 
 interface BillboardClientProps {
     data: Array<{
@@ -19,6 +23,11 @@ interface BillboardClientProps {
 export const BillboardClient = ({ data }: BillboardClientProps) => {
     const router = useRouter();
     const params = useParams();
+    const tableData = data.map((b) => ({
+        ...b,
+        createdAt: typeof b.createdAt === 'string' ? b.createdAt : new Date(b.createdAt).toISOString(),
+        updatedAt: typeof b.updatedAt === 'string' ? b.updatedAt : new Date(b.updatedAt).toISOString(),
+    }));
 
     return(
         <>
@@ -33,6 +42,12 @@ export const BillboardClient = ({ data }: BillboardClientProps) => {
           </Button>
         </div>
         <Separator />
+        <DataTable  searchKey="label"  columns={columns} data={tableData} />
+        <Heading title="API" description="API calls for billboards" />
+        <Separator />
+        <div className="mt-2 space-y-2">
+          <ApiList entityName="billboards" entityIdName="billboardId" />
+        </div>
         </>
     )
 }
