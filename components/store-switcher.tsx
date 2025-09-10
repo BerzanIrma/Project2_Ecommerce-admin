@@ -5,10 +5,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { useStoreModal } from "@/hooks/use-store-modal";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from "@/components/ui/command";
+
 
 
 
@@ -29,6 +30,11 @@ export default function StoreSwitcher({
   const pathname = usePathname(); // ensure re-render on route change
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
    const formattedItems = items.map((item) => ({
     label: item.name,
     value: item.id,
@@ -43,6 +49,10 @@ export default function StoreSwitcher({
    const onStoreSelect = (store: { value: string; label: string }) => {
      setOpen(false);
         router.push(`/${store.value}`);
+   }
+
+   if (!mounted) {
+     return null;
    }
 
     return (
