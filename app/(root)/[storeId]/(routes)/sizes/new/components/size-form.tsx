@@ -1,7 +1,7 @@
 "use client";
 
 import * as z from "zod";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
@@ -13,54 +13,35 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().min(1),
-  billboardId: z.string().min(1),
+  value: z.string().min(1),
 });
 
-type CategoryFormValues = z.infer<typeof formSchema>;
+type SizeFormValues = z.infer<typeof formSchema>;
 
-interface Billboard {
-  id: string;
-  label: string;
-}
-
-export const CategoryForm = () => {
+export const SizeForm = () => {
   const params = useParams();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [billboards, setBillboards] = useState<Billboard[]>([]);
 
-  const form = useForm<CategoryFormValues>({
+  const form = useForm<SizeFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      billboardId: "",
+      value: "",
     },
   });
 
-  useEffect(() => {
-    const fetchBillboards = async () => {
-      try {
-        const response = await axios.get(`/api/${params.storeId}/billboards`);
-        setBillboards(response.data);
-      } catch (error) {
-        toast.error("Failed to load billboards");
-      }
-    };
-    fetchBillboards();
-  }, [params.storeId]);
-
-  const onSubmit = async (data: CategoryFormValues) => {
+  const onSubmit = async (data: SizeFormValues) => {
     try {
       setLoading(true);
-      const res = await axios.post(`/api/${params.storeId}/categories`, data);
-      toast.success("Category created.");
+      const res = await axios.post(`/api/${params.storeId}/sizes`, data);
+      toast.success("Size created.");
       router.refresh();
-      router.push(`/${params.storeId}/categories?refresh=${Date.now()}`);
+      router.push(`/${params.storeId}/sizes?refresh=${Date.now()}`);
     } catch (e) {
       toast.error("Something went wrong.");
     } finally {
@@ -68,8 +49,8 @@ export const CategoryForm = () => {
     }
   };
 
-  const title = "Create Category";
-  const description = "Add a new category";
+  const title = "Create Size";
+  const description = "Add a new size";
   const action = "Create";
 
   return (
@@ -88,7 +69,7 @@ export const CategoryForm = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={loading} placeholder="Category name" {...field} />
+                    <Input disabled={loading} placeholder="Size name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -96,24 +77,13 @@ export const CategoryForm = () => {
             />
             <FormField
               control={form.control}
-              name="billboardId"
+              name="value"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Billboard</FormLabel>
-                  <Select disabled={loading} onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a billboard" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {billboards.map((b) => (
-                        <SelectItem key={b.id} value={b.id}>
-                          {b.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Value</FormLabel>
+                  <FormControl>
+                    <Input disabled={loading} placeholder="e.g. XL, 42, 10" {...field} />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -128,4 +98,7 @@ export const CategoryForm = () => {
     </>
   );
 };
+
+
+
 
