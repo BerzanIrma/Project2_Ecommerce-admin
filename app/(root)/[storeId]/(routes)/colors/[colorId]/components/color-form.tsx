@@ -21,9 +21,9 @@ const formSchema = z.object({
   value: z.string().min(1),
 });
 
-type SizeFormValues = z.infer<typeof formSchema>;
+type ColorFormValues = z.infer<typeof formSchema>;
 
-export const SizeEditForm = () => {
+export const ColorEditForm = () => {
   const params = useParams();
   const router = useRouter();
 
@@ -31,7 +31,7 @@ export const SizeEditForm = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const form = useForm<SizeFormValues>({
+  const form = useForm<ColorFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -43,13 +43,13 @@ export const SizeEditForm = () => {
     const load = async () => {
       try {
         try {
-          const res = await axios.get(`/api/${params.storeId}/sizes/${params.sizeId}`);
+          const res = await axios.get(`/api/${params.storeId}/colors/${params.colorId}`);
           form.reset({ name: res.data.name, value: res.data.value });
         } catch {
-          const list = await axios.get(`/api/${params.storeId}/sizes`);
-          const found = (list.data || []).find((s: any) => s.id === params.sizeId);
+          const list = await axios.get(`/api/${params.storeId}/colors`);
+          const found = (list.data || []).find((c: any) => c.id === params.colorId);
           if (found) form.reset({ name: found.name, value: found.value });
-          else toast.error("Failed to load size");
+          else toast.error("Failed to load color");
         }
       } catch {
         toast.error("Failed to load data");
@@ -58,15 +58,15 @@ export const SizeEditForm = () => {
       }
     };
     load();
-  }, [params.storeId, params.sizeId]);
+  }, [params.storeId, params.colorId]);
 
-  const onSubmit = async (data: SizeFormValues) => {
+  const onSubmit = async (data: ColorFormValues) => {
     try {
       setLoading(true);
-      await axios.patch(`/api/${params.storeId}/sizes/${params.sizeId}`, data);
-      toast.success("Size updated.");
+      await axios.patch(`/api/${params.storeId}/colors/${params.colorId}`, data);
+      toast.success("Color updated.");
       router.refresh();
-      router.push(`/${params.storeId}/sizes?refresh=${Date.now()}`);
+      router.push(`/${params.storeId}/colors?refresh=${Date.now()}`);
     } catch {
       toast.error("Something went wrong.");
     } finally {
@@ -77,20 +77,20 @@ export const SizeEditForm = () => {
   const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`);
-      toast.success("Size deleted.");
+      await axios.delete(`/api/${params.storeId}/colors/${params.colorId}`);
+      toast.success("Color deleted.");
       router.refresh();
-      router.push(`/${params.storeId}/sizes?refresh=${Date.now()}`);
+      router.push(`/${params.storeId}/colors?refresh=${Date.now()}`);
     } catch {
-      toast.error("Failed to delete size.");
+      toast.error("Failed to delete color.");
     } finally {
       setLoading(false);
       setOpen(false);
     }
   };
 
-  const title = "Edit Size";
-  const description = "Update size details";
+  const title = "Edit Color";
+  const description = "Update color details";
   const action = "Save changes";
 
   return (
@@ -113,7 +113,7 @@ export const SizeEditForm = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={loading || initialLoading} placeholder="Size name" {...field} />
+                    <Input disabled={loading || initialLoading} placeholder="Color name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -122,15 +122,28 @@ export const SizeEditForm = () => {
             <FormField
               control={form.control}
               name="value"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Value</FormLabel>
-                  <FormControl>
-                    <Input disabled={loading || initialLoading} placeholder="e.g. XL, 42, 10" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const val = (field.value || "") as string;
+                const isHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val);
+                const previewColor = isHex ? val : "transparent";
+                return (
+                  <FormItem>
+                    <FormLabel>Value</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-3">
+                        <Input disabled={loading || initialLoading} placeholder="#000000" {...field} />
+                        <div
+                          aria-label="color preview"
+                          className="h-6 w-6 rounded-full border"
+                          style={{ backgroundColor: previewColor }}
+                          title={isHex ? val : "Enter hex like #fff or #ffffff"}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
           <Button disabled={loading || initialLoading} className="ml-auto" type="submit">
@@ -142,8 +155,5 @@ export const SizeEditForm = () => {
     </>
   );
 };
-
-
-
 
 

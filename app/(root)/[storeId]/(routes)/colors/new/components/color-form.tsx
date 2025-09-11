@@ -19,15 +19,15 @@ const formSchema = z.object({
   value: z.string().min(1),
 });
 
-type SizeFormValues = z.infer<typeof formSchema>;
+type ColorFormValues = z.infer<typeof formSchema>;
 
-export const SizeForm = () => {
+export const ColorForm = () => {
   const params = useParams();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
 
-  const form = useForm<SizeFormValues>({
+  const form = useForm<ColorFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
@@ -35,13 +35,13 @@ export const SizeForm = () => {
     },
   });
 
-  const onSubmit = async (data: SizeFormValues) => {
+  const onSubmit = async (data: ColorFormValues) => {
     try {
       setLoading(true);
-      const res = await axios.post(`/api/${params.storeId}/sizes`, data);
-      toast.success("Size created.");
+      const res = await axios.post(`/api/${params.storeId}/colors`, data);
+      toast.success("Color created.");
       router.refresh();
-      router.push(`/${params.storeId}/sizes?refresh=${Date.now()}`);
+      router.push(`/${params.storeId}/colors?refresh=${Date.now()}`);
     } catch (e) {
       toast.error("Something went wrong.");
     } finally {
@@ -49,8 +49,8 @@ export const SizeForm = () => {
     }
   };
 
-  const title = "Create Size";
-  const description = "Add a new size";
+  const title = "Create Color";
+  const description = "Add a new color";
   const action = "Create";
 
   return (
@@ -69,7 +69,7 @@ export const SizeForm = () => {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input disabled={loading} placeholder="Size name" {...field} />
+                    <Input disabled={loading} placeholder="Color name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -78,15 +78,28 @@ export const SizeForm = () => {
             <FormField
               control={form.control}
               name="value"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Value</FormLabel>
-                  <FormControl>
-                    <Input disabled={loading} placeholder="e.g. XL, 42, 10" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+              render={({ field }) => {
+                const val = (field.value || "") as string;
+                const isHex = /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/.test(val);
+                const previewColor = isHex ? val : "transparent";
+                return (
+                  <FormItem>
+                    <FormLabel>Value</FormLabel>
+                    <FormControl>
+                      <div className="flex items-center gap-3">
+                        <Input disabled={loading} placeholder="#000000" {...field} />
+                        <div
+                          aria-label="color preview"
+                          className="h-6 w-6 rounded-full border"
+                          style={{ backgroundColor: previewColor }}
+                          title={isHex ? val : "Enter hex like #fff or #ffffff"}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
           </div>
           <Button disabled={loading} className="ml-auto" type="submit">
@@ -98,8 +111,5 @@ export const SizeForm = () => {
     </>
   );
 };
-
-
-
 
 
