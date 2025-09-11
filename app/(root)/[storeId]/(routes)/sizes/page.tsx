@@ -1,4 +1,5 @@
 import prismadb from "@/lib/prismadb";
+import { formatDateMDY } from "@/lib/utils";
 import { Suspense } from "react";
 
 import { SizesClient } from "./components/client";
@@ -21,8 +22,8 @@ const SizesPage = async ({ params }: SizesPageProps) => {
             id: s.id,
             name: s.name,
             value: s.value,
-            createdAt: s.createdAt.toISOString(),
-            updatedAt: s.updatedAt.toISOString(),
+            createdAt: formatDateMDY(s.createdAt),
+            updatedAt: formatDateMDY(s.updatedAt),
         }));
     } catch {}
 

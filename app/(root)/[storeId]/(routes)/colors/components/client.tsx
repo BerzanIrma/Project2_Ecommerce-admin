@@ -9,6 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColorColumn, columns } from "./columns";
 import { ApiList } from "@/components/ui/api-list";
 import { useEffect, useState } from "react";
+import { formatDateMDY } from "@/lib/utils";
 import axios from "axios";
 
 interface ColorsClientProps {
@@ -40,7 +41,7 @@ export const ColorsClient = ({ data }: ColorsClientProps) => {
                 id: c.id,
                 name: c.name,
                 value: c.value,
-                createdAt: c.updatedAt ?? c.createdAt,
+                createdAt: formatDateMDY(c.updatedAt ?? c.createdAt),
             }));
             try {
                 const rawDeleted = localStorage.getItem('colors:deletedIds');

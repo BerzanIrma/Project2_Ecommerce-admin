@@ -1,5 +1,6 @@
 import { BillboardClient } from "./components/client";
 import prismadb from "@/lib/prismadb";
+import { formatDateMDY } from "@/lib/utils";
 
 interface BillboardsPageProps {
     params: {
@@ -24,8 +25,8 @@ const BillboardsPage = async ({ params }: BillboardsPageProps) => {
         id: b.id,
         label: b.label,
         imageUrl: b.imageUrl,
-        createdAt: b.createdAt.toISOString(),
-        updatedAt: b.updatedAt.toISOString(),
+        createdAt: formatDateMDY(b.createdAt),
+        updatedAt: formatDateMDY(b.updatedAt),
     }));
 
     console.log("BillboardsPage - Found billboards:", formatted.length);

@@ -10,6 +10,7 @@ import { CategoryColumn, columns } from "./columns";
 import { ApiList } from "@/components/ui/api-list";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { formatDateMDY } from "@/lib/utils";
 
 interface CategoriesClientProps {
     data: CategoryColumn[];
@@ -36,8 +37,7 @@ export const CategoriesClient = ({ data }: CategoriesClientProps) => {
                 id: c.id,
                 name: c.name,
                 billboard: billboardsMap[c.billboardId] || 'Unknown Billboard',
-                // Show last updated date in the Date column, like billboards
-                createdAt: (c.updatedAt instanceof Date ? c.updatedAt.toISOString() : c.updatedAt) || (c.createdAt instanceof Date ? c.createdAt.toISOString() : c.createdAt),
+                createdAt: formatDateMDY((c.updatedAt as any) ?? (c.createdAt as any)),
             }));
             // Drop deleted rows based on durable deleted IDs
             try {
@@ -56,7 +56,7 @@ export const CategoriesClient = ({ data }: CategoriesClientProps) => {
                         ...row,
                         name: overrides[row.id].name ?? row.name,
                         billboard: overrides[row.id].billboardLabel ?? row.billboard,
-                        createdAt: overrides[row.id].updatedAt ?? row.createdAt,
+                        createdAt: overrides[row.id].updatedAt ? formatDateMDY(overrides[row.id].updatedAt) : row.createdAt,
                     } : row);
                 }
             } catch {}
@@ -72,7 +72,7 @@ export const CategoriesClient = ({ data }: CategoriesClientProps) => {
                         ...row,
                         name: payload.name ?? row.name,
                         billboard: payload.billboardLabel ?? row.billboard,
-                        createdAt: payload.updatedAt ?? row.createdAt,
+                        createdAt: payload.updatedAt ? formatDateMDY(payload.updatedAt) : row.createdAt,
                     } : row));
                     sessionStorage.removeItem('categories:pendingUpdate');
                 }

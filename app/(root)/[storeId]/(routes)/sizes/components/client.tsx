@@ -9,6 +9,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { SizeColumn, columns } from "./columns";
 import { ApiList } from "@/components/ui/api-list";
 import { useEffect, useState } from "react";
+import { formatDateMDY } from "@/lib/utils";
 import axios from "axios";
 
 interface SizesClientProps {
@@ -40,7 +41,7 @@ export const SizesClient = ({ data }: SizesClientProps) => {
                 id: s.id,
                 name: s.name,
                 value: s.value,
-                createdAt: s.updatedAt ?? s.createdAt,
+                createdAt: formatDateMDY(s.updatedAt ?? s.createdAt),
             }));
             try {
                 const rawDeleted = localStorage.getItem('sizes:deletedIds');

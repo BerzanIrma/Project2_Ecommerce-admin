@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import prismadb from "@/lib/prismadb";
 import { ColorsClient } from "./components/client";
+import { formatDateMDY } from "@/lib/utils";
 
 interface ColorsPageProps {
     params: { storeId: string };
@@ -17,8 +18,8 @@ const ColorsPage = async ({ params }: ColorsPageProps) => {
             id: c.id,
             name: c.name,
             value: c.value,
-            createdAt: c.createdAt.toISOString(),
-            updatedAt: c.updatedAt.toISOString(),
+            createdAt: formatDateMDY(c.createdAt),
+            updatedAt: formatDateMDY(c.updatedAt),
         }));
     } catch {}
 
