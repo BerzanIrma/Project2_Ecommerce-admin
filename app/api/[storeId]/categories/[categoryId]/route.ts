@@ -11,6 +11,7 @@ export async function GET(
       const category = await (prismadb as any).category.findFirst({
         where: { id: params.categoryId, storeId: params.storeId },
         select: { id: true, name: true, billboardId: true, createdAt: true, updatedAt: true }
+         
       });
       if (!category) return new NextResponse('Not found', { status: 404 });
       return NextResponse.json(category);
