@@ -3,8 +3,10 @@ import { ClerkProvider } from '@clerk/nextjs'
 import { Toaster } from 'react-hot-toast'
 
 import { ModalProvider } from '@/providers/modal-provider'
+import { ThemeDebug } from '@/components/theme-debug'
 
 import './globals.css'
+import { ThemeProvider } from '@/providers/theme-provider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,11 +22,14 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" suppressHydrationWarning>
          <body className={inter.className}>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ModalProvider />
           <Toaster position="top-center" />
           {children}
+          <ThemeDebug />
+         </ThemeProvider>
          </body>
       </html>   
     </ClerkProvider>
